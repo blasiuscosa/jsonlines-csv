@@ -30,12 +30,10 @@ class JsonLinesController
             $json = json_decode($json_line, true);
             $total_qty = 0;
             $total_price = 0;
-            $total_distinct_qty = 0;
             $items = array();
             foreach ($json['items'] as $item) {
                 if (array_key_exists($item['product']['product_id'], $items)) {
                     $items[$item['product']['product_id']] += $item['quantity'];
-                    $total_distinct_qty += $items[$item['product']['product_id']];
                 } else {
                     $items[$item['product']['product_id']] = $item['quantity'];
                 }
@@ -54,7 +52,7 @@ class JsonLinesController
                     gmdate('Y-m-d\TH:i:s.u\Z', strtotime($json['order_date'])),
                     $total_price,
                     $total_price / $total_qty,
-                    $total_distinct_qty,
+                    count($items),
                     $total_qty,
                     $json['customer']['shipping_address']['state']
                 ));
@@ -67,9 +65,9 @@ class JsonLinesController
         $jsonlines_out = (new JsonLines())->enline($this->csvToJson($csv));
         file_put_contents("out.jsonl", $jsonlines_out);
 
-        return new Response('Successfully converted json to csv file. <a href="../' . $csv .
+        return new Response('Successfully converted to csv file. <a href="../' . $csv .
             '" target="_blank">Click here to open it.</a><br/>' .
-            'Or Jsonlines file <a href="../out.jsonl" target="_blank">here</a>');
+            'Or the Jsonlines file <a href="../out.jsonl" target="_blank">here</a>');
     }
 
     // function to convert csv to json format
